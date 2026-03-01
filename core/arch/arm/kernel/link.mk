@@ -16,6 +16,7 @@ endif
 link-ldflags += -T $(link-script-pp) -Map=$(link-out-dir)/tee.map
 link-ldflags += --sort-section=alignment
 link-ldflags += --fatal-warnings
+link-ldflags += --no-warn-rwx-segments
 link-ldflags += --gc-sections
 
 link-ldadd  = $(LDADD)
