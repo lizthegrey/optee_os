@@ -42,6 +42,7 @@
 #include <kernel/dt.h>
 #include <kernel/misc.h>
 #include <kernel/panic.h>
+#include <kernel/stmm_sp.h>
 #include <kernel/thread.h>
 #include <kernel/tz_ssvce_def.h>
 #include <libfdt.h>
@@ -212,3 +213,41 @@ void boot_secondary_init_intc(void)
 {
 	gic_init_per_cpu();
 }
+
+#if defined(CFG_WITH_STMM_SP) && \
+    (defined(PLATFORM_FLAVOR_lx2160aqds) || defined(PLATFORM_FLAVOR_lx2160ardb))
+TEE_Result alloc_plat_stmm_io(struct stmm_ctx *spc)
+{
+	TEE_Result res = TEE_SUCCESS;
+	vaddr_t va = 0;
+
+	/* Map DCFG for clock reads */
+	res = alloc_and_map_io(spc, 0x01e00000, 0x00001000,
+			       TEE_MATTR_URW | TEE_MATTR_PRW, &va);
+	if (res) {
+		EMSG("failed to map dcfg");
+		return res;
+	}
+	DMSG("dcfg va=%#"PRIxVA, va);
+
+	/* Map I2C5 for EEPROM variable storage and RTC */
+	res = alloc_and_map_io(spc, 0x02040000, 0x00001000,
+			       TEE_MATTR_URW | TEE_MATTR_PRW, &va);
+	if (res) {
+		EMSG("failed to map i2c5");
+		return res;
+	}
+	DMSG("i2c5 va=%#"PRIxVA, va);
+
+	/* Map UART0 for debug output */
+	res = alloc_and_map_io(spc, 0x021c0000, 0x00001000,
+			       TEE_MATTR_URW | TEE_MATTR_PRW, &va);
+	if (res) {
+		EMSG("failed to map uart0");
+		return res;
+	}
+	DMSG("uart0 va=%#"PRIxVA, va);
+
+	return TEE_SUCCESS;
+}
+#endif

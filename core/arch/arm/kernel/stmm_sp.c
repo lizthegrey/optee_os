@@ -209,6 +209,35 @@ static TEE_Result alloc_and_map_sp_fobj(struct stmm_ctx *spc, size_t sz,
 	return TEE_SUCCESS;
 }
 
+TEE_Result alloc_and_map_io(struct stmm_ctx *spc, paddr_t pa,
+			    size_t sz, uint32_t prot, vaddr_t *va)
+{
+	struct mobj *mobj;
+	TEE_Result res = TEE_SUCCESS;
+
+	if (sz == 0)
+		return res;
+
+	sz = ROUNDUP(sz, SMALL_PAGE_SIZE);
+	mobj = mobj_phys_alloc(pa, sz, TEE_MATTR_MEM_TYPE_DEV,
+			       CORE_MEM_NON_SEC);
+	if (!mobj) {
+		EMSG("failed to alloc size %#zx at %#"PRIxPA, sz, pa);
+		return TEE_ERROR_OUT_OF_MEMORY;
+	}
+
+	res = vm_map(&spc->uctx, va, sz, prot, 0, mobj, 0);
+	if (res)
+		mobj_put(mobj);
+
+	return res;
+}
+
+TEE_Result __weak alloc_plat_stmm_io(struct stmm_ctx *spc __unused)
+{
+	return TEE_SUCCESS;
+}
+
 static void *zalloc(void *opaque __unused, unsigned int items,
 		    unsigned int size)
 {
@@ -358,6 +387,10 @@ static TEE_Result load_stmm(struct stmm_ctx *spc)
 	 * We don't need to free the previous instance here, they'll all be
 	 * handled during the destruction call (stmm_ctx_destroy())
 	 */
+	if (res)
+		return res;
+
+	res = alloc_plat_stmm_io(spc);
 	if (res)
 		return res;
 

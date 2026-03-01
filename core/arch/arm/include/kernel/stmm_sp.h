@@ -141,6 +141,10 @@ struct stmm_ctx {
 
 extern const struct ts_ops stmm_sp_ops;
 
+TEE_Result alloc_and_map_io(struct stmm_ctx *spc, paddr_t pa,
+			    size_t sz, uint32_t prot, vaddr_t *va);
+TEE_Result alloc_plat_stmm_io(struct stmm_ctx *spc);
+
 static inline bool is_stmm_ctx(struct ts_ctx *ctx __maybe_unused)
 {
 	return IS_ENABLED(CFG_WITH_STMM_SP) && ctx && ctx->ops == &stmm_sp_ops;
