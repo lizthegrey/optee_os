@@ -1008,6 +1008,11 @@ static bool spm_handle_scall(struct thread_scall_regs *regs)
 		DMSG("Received FFA mem perm set");
 		spm_handle_set_mem_attr(regs);
 		return true;
+	case FFA_FEATURES:
+		DMSG("Received FFA features query %#"PRIx32,
+		     (uint32_t)SVC_REGS_A1(regs));
+		spm_eret_error(FFA_NOT_SUPPORTED, regs);
+		return true;
 	case FFA_ERROR:
 		EMSG("Received FFA error");
 		return_from_sp_helper(true /*panic*/, 0xabcd, regs);
