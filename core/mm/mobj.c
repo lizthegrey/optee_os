@@ -182,6 +182,9 @@ struct mobj *mobj_phys_alloc(paddr_t pa, size_t size, uint32_t mem_type,
 	enum teecore_memtypes area_type;
 
 	switch (battr) {
+	case CORE_MEM_NON_SEC:
+		area_type = MEM_AREA_IO_NSEC;
+		break;
 	case CORE_MEM_NSEC_SHM:
 		area_type = MEM_AREA_NSEC_SHM;
 		break;

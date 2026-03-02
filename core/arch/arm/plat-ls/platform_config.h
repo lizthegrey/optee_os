@@ -109,6 +109,7 @@
 #define GICD_OFFSET			0x0
 #define CAAM_BASE			0x08000000
 #define CAAM_SIZE			0x100000
+#define DCFG_BASE			0x01E00000
 #endif
 
 #if defined(PLATFORM_FLAVOR_lx2160aqds)
