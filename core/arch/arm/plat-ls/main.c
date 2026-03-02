@@ -221,7 +221,16 @@ TEE_Result alloc_plat_stmm_io(struct stmm_ctx *spc)
 	TEE_Result res = TEE_SUCCESS;
 	vaddr_t va = 0;
 
-	/* Map DCFG for clock reads */
+	/*
+	 * Map MMIO regions at fixed VAs matching the PCDs compiled into
+	 * StandaloneMm (Platform/SolidRun/StandAloneMm/StandaloneMm.dsc).
+	 * These must be above the StMM image+heap+buffer allocations
+	 * (which can reach ~0x4041e000 on OP-TEE 4.9.0 DEBUG builds).
+	 * If these addresses change in the DSC, they must be updated here.
+	 */
+
+	/* Map DCFG for clock reads (PcdGutsBaseAddr) */
+	va = 0x41000000;
 	res = alloc_and_map_io(spc, 0x01e00000, 0x00001000,
 			       TEE_MATTR_URW | TEE_MATTR_PRW, &va);
 	if (res) {
@@ -230,7 +239,8 @@ TEE_Result alloc_plat_stmm_io(struct stmm_ctx *spc)
 	}
 	DMSG("dcfg va=%#"PRIxVA, va);
 
-	/* Map I2C5 for EEPROM variable storage and RTC */
+	/* Map I2C5 for EEPROM variable storage and RTC (PcdI2c5BaseAddr) */
+	va = 0x41001000;
 	res = alloc_and_map_io(spc, 0x02040000, 0x00001000,
 			       TEE_MATTR_URW | TEE_MATTR_PRW, &va);
 	if (res) {
@@ -239,7 +249,8 @@ TEE_Result alloc_plat_stmm_io(struct stmm_ctx *spc)
 	}
 	DMSG("i2c5 va=%#"PRIxVA, va);
 
-	/* Map UART0 for debug output */
+	/* Map UART0 for debug output (PcdSerialRegisterBase) */
+	va = 0x41002000;
 	res = alloc_and_map_io(spc, 0x021c0000, 0x00001000,
 			       TEE_MATTR_URW | TEE_MATTR_PRW, &va);
 	if (res) {
